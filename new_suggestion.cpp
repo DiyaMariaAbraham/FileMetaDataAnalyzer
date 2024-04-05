@@ -3,11 +3,10 @@
 #include <string>
 #include <type_traits>
 
-// Type traits to check if a given type is one of a list of types
 template<typename T, typename... Ts>
 struct is_one_of : std::disjunction<std::is_same<T, Ts>...> {};
 
-// Enum for file types
+
 enum class FileType {
     Unknown,
     Text,
@@ -20,10 +19,8 @@ enum class FileType {
     Word,
     PowerPoint,
     Excel
-    // Add more types as needed
 };
 
-// Template specialization for file type detection
 template<typename T>
 struct FileTypeDetector;
 
@@ -34,17 +31,16 @@ struct FileTypeDetector<std::ifstream> {
         if (!file)
             return FileType::Unknown;
 
-        char magic_number[4]; // Adjust according to the file types you want to detect
+        char magic_number[4]; 
         file.read(magic_number, sizeof(magic_number));
 
         std::cout << "Magic number: ";
         for(auto i : magic_number) {
-            std::cout << std::hex << (int)(unsigned char)i << " "; // Print each byte of the magic number in hexadecimal format
+            std::cout << std::hex << (int)(unsigned char)i << " "; /
         }
         std::cout << std::endl;
 
-        // Check magic numbers or other criteria to determine file type
-        // This is a simple example, you'll need to replace it with actual checks
+        
         if (magic_number[0] == '\x51' && magic_number[1] == '\x4B' && magic_number[2] == '\x03' && magic_number[3] == '\x04')
             return FileType::Archive; // ZIP file
         else if (magic_number[0] == '\xFF' && magic_number[1] == '\xD8' && magic_number[2] == '\xFF')
@@ -71,7 +67,6 @@ struct FileTypeDetector<std::ifstream> {
     }
 };
 
-// Suggestions for opening different file types
 template<FileType type>
 struct FileOpener;
 
@@ -87,7 +82,7 @@ struct FileOpener<FileType::Image> {
     static void suggest() {
         std::cout << "Open with image viewer" << std::endl;
         std::string command = "xdg-open ";
-        command += "/home/pes1ug21cs188/Desktop/Project/image1"; // You can replace "example.jpg" with the actual file name
+        command += "/home/pes1ug21cs188/Desktop/Project/image1"; 
         int result = std::system(command.c_str());
         if (result != 0) {
             std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
@@ -100,7 +95,7 @@ struct FileOpener<FileType::Audio> {
     static void suggest() {
         std::cout << "Open with media player" << std::endl;
         std::string command = "xdg-open ";
-        command += "/home/pes1ug21cs188/Desktop/Project/video.mp4"; // You can replace "example.jpg" with the actual file name
+        command += "/home/pes1ug21cs188/Desktop/Project/video.mp4"; 
         int result = std::system(command.c_str());
         if (result != 0) {
             std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
@@ -134,7 +129,7 @@ struct FileOpener<FileType::PowerPoint> {
     static void suggest() {
         std::cout << "Open with image viewer" << std::endl;
         std::string command = "libreoffice --impress ";
-        command += "/home/pes1ug21cs188/Desktop/Project/slides.odp"; // You can replace "example.jpg" with the actual file name
+        command += "/home/pes1ug21cs188/Desktop/Project/slides.odp"; 
         int result = std::system(command.c_str());
         if (result != 0) {
             std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
