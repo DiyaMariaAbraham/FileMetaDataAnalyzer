@@ -22,7 +22,8 @@ enum class FileType {
     PDF,
     Word,
     PowerPoint,
-    Excel
+    Excel,
+    XML
     // Add more types as needed
 };
 
@@ -58,14 +59,14 @@ struct FileTypeDetector<std::ifstream> {
             return FileType::Audio; // MP4 file
         else if (magic_number[0] == '\x89' && magic_number[1] == '\x50' && magic_number[2] == '\x4E' && magic_number[3] == '\x47')
             return FileType::Image; // PNG file
-        else if (magic_number[0] == 'I' && magic_number[1] == 'I' && magic_number[2] == '\x00' && magic_number[3] == '\x10')
-            return FileType::Executable; // EXE file
+        else if (magic_number[0] == '\x3C' && magic_number[1] == '\x6E' && magic_number[2] == '\x6F' && magic_number[3] == '\x74')
+            return FileType::Executable; // XML file
         else if (magic_number[0] == '\x25' && magic_number[1] == '\x50' && magic_number[2] == '\x44' && magic_number[3] == '\x46')
             return FileType::PDF; // PDF file
-        else if (magic_number[0] == 'd' && magic_number[1] == 'o' && magic_number[2] == 'c' && magic_number[3] == 'x')
-            return FileType::Word; // DOCX file
+        else if (magic_number[0] == '\x3C' && magic_number[1] == '\x48' && magic_number[2] == '\x74' && magic_number[3] == '\x6D')
+            return FileType::Executable; // HTML file
         else if (magic_number[0] == '\x50' && magic_number[1] == '\x4B' && magic_number[2] == '\x03' && magic_number[3] == '\x04')
-            return FileType::PowerPoint; // PPTX file
+            return FileType::PowerPoint; // ODP file
         else if (magic_number[0] == 'x' && magic_number[1] == 'l' && magic_number[2] == 's' && magic_number[3] == 'x')
             return FileType::Excel; // XLSX file
         else
@@ -112,7 +113,7 @@ struct FileOpener<FileType::Audio> {
             std::string command = "totem " + filename;
             int result = std::system(command.c_str());
             if (result != 0) {
-                std::cerr << "Error: Failed to open the audio file." << std::endl;
+                std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
             }
         }
     }
@@ -121,7 +122,43 @@ struct FileOpener<FileType::Audio> {
 template<>
 struct FileOpener<FileType::Executable> {
     static void suggest(const std::string& filename) {
-        std::cout << "Open with system's default program" << std::endl;
+        char response;
+        std::cout << "How do you want to open the file?" << std::endl;
+        std::cout << "1. Open with a text editor" << std::endl;
+        std::cout << "2. Open with Firefox" << std::endl;
+        std::cout << "3. Open with Vim" << std::endl;
+        std::cout << "Enter your choice (1/2/3): ";
+        std::cin >> response;
+
+        switch (response) {
+            case '1': {
+                std::string command = "nano " + filename; // Open with gedit
+                int result = std::system(command.c_str());
+                if (result != 0) {
+                    std::cerr << "Error: Failed to open the file with gedit." << std::endl;
+                }
+                break;
+            }
+            case '2': {
+                std::string command = "firefox " + filename; // Open with Firefox
+                int result = std::system(command.c_str());
+                if (result != 0) {
+                    std::cerr << "Error: Failed to open the file with Firefox." << std::endl;
+                }
+                break;
+            }
+            case '3': {
+                std::string command = "vim " + filename; // Open with Vim
+                int result = std::system(command.c_str());
+                if (result != 0) {
+                    std::cerr << "Error: Failed to open the file with Vim." << std::endl;
+                }
+                break;
+            }
+            default:
+                std::cerr << "Invalid choice" << std::endl;
+                break;
+        }
     }
 };
 
@@ -158,7 +195,7 @@ struct FileOpener<FileType::PowerPoint> {
             std::string command = "libreoffice --impress " + filename;
             int result = std::system(command.c_str());
             if (result != 0) {
-                std::cerr << "Error: Failed to open the powerpoint file." << std::endl;
+                std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
             }
         }
     }
@@ -170,6 +207,7 @@ struct FileOpener<FileType::Excel> {
         std::cout << "Open with spreadsheet software" << std::endl;
     }
 };
+
 
 // Function to analyze file metadata
 template<typename T>
