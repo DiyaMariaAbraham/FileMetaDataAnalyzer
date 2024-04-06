@@ -6,11 +6,10 @@
 
 using namespace std;
 
-// Type traits to check if a given type is one of a list of types
 template<typename T, typename... Ts>
 struct is_one_of : std::disjunction<std::is_same<T, Ts>...> {};
 
-// Enum for file types
+
 enum class FileType {
     Unknown,
     Text,
@@ -24,10 +23,8 @@ enum class FileType {
     PowerPoint,
     Excel,
     XML
-    // Add more types as needed
 };
 
-// Template specialization for file type detection
 template<typename T>
 struct FileTypeDetector;
 
@@ -38,17 +35,16 @@ struct FileTypeDetector<std::ifstream> {
         if (!file)
             return FileType::Unknown;
 
-        char magic_number[4]; // Adjust according to the file types you want to detect
+        char magic_number[4]; 
         file.read(magic_number, sizeof(magic_number));
 
         std::cout << "Magic number: ";
         for(auto i : magic_number) {
-            std::cout << std::hex << (int)(unsigned char)i << " "; // Print each byte of the magic number in hexadecimal format
+            std::cout << std::hex << (int)(unsigned char)i << " "; 
         }
         std::cout << std::endl;
 
         // Check magic numbers or other criteria to determine file type
-        // This is a simple example, you'll need to replace it with actual checks
         if (magic_number[0] == '\x51' && magic_number[1] == '\x4B' && magic_number[2] == '\x03' && magic_number[3] == '\x04')
             return FileType::Archive; // ZIP file
         else if (magic_number[0] == '\xFF' && magic_number[1] == '\xD8' && magic_number[2] == '\xFF')
