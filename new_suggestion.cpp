@@ -2,11 +2,15 @@
 #include <fstream>
 #include <string>
 #include <type_traits>
+#include <cstdlib>
 
+using namespace std;
+
+// Type traits to check if a given type is one of a list of types
 template<typename T, typename... Ts>
 struct is_one_of : std::disjunction<std::is_same<T, Ts>...> {};
 
-
+// Enum for file types
 enum class FileType {
     Unknown,
     Text,
@@ -19,8 +23,10 @@ enum class FileType {
     Word,
     PowerPoint,
     Excel
+    // Add more types as needed
 };
 
+// Template specialization for file type detection
 template<typename T>
 struct FileTypeDetector;
 
@@ -31,16 +37,17 @@ struct FileTypeDetector<std::ifstream> {
         if (!file)
             return FileType::Unknown;
 
-        char magic_number[4]; 
+        char magic_number[4]; // Adjust according to the file types you want to detect
         file.read(magic_number, sizeof(magic_number));
 
         std::cout << "Magic number: ";
         for(auto i : magic_number) {
-            std::cout << std::hex << (int)(unsigned char)i << " "; /
+            std::cout << std::hex << (int)(unsigned char)i << " "; // Print each byte of the magic number in hexadecimal format
         }
         std::cout << std::endl;
 
-        
+        // Check magic numbers or other criteria to determine file type
+        // This is a simple example, you'll need to replace it with actual checks
         if (magic_number[0] == '\x51' && magic_number[1] == '\x4B' && magic_number[2] == '\x03' && magic_number[3] == '\x04')
             return FileType::Archive; // ZIP file
         else if (magic_number[0] == '\xFF' && magic_number[1] == '\xD8' && magic_number[2] == '\xFF')
@@ -67,69 +74,38 @@ struct FileTypeDetector<std::ifstream> {
     }
 };
 
+// Suggestions for opening different file types
 template<FileType type>
 struct FileOpener;
 
 template<>
 struct FileOpener<FileType::Archive> {
-    static void suggest() {
+    static void suggest(const std::string& filename) {
         std::cout << "Open with file archiver" << std::endl;
     }
 };
 
 template<>
 struct FileOpener<FileType::Image> {
-    static void suggest() {
-        std::cout << "Open with image viewer" << std::endl;
-        std::string command = "xdg-open ";
-        command += "/home/pes1ug21cs188/Desktop/Project/image1"; 
-        int result = std::system(command.c_str());
-        if (result != 0) {
-            std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
+    static void suggest(const std::string& filename) {
+        char response;
+        std::cout << "Do you want to open with the image viewer? (y/n): ";
+        std::cin >> response;
+        if (std::tolower(response) == 'y') {
+            std::string command = "eog " + filename;
+            int result = std::system(command.c_str());
+            if (result != 0) {
+                std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
+            }
         }
     }
 };
 
 template<>
 struct FileOpener<FileType::Audio> {
-    static void suggest() {
+    static void suggest(const std::string& filename) {
         std::cout << "Open with media player" << std::endl;
-        std::string command = "xdg-open ";
-        command += "/home/pes1ug21cs188/Desktop/Project/video.mp4"; 
-        int result = std::system(command.c_str());
-        if (result != 0) {
-            std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
-    }
-  }
-};
-
-template<>
-struct FileOpener<FileType::Executable> {
-    static void suggest() {
-        std::cout << "Open with system's default program" << std::endl;
-    }
-};
-
-template<>
-struct FileOpener<FileType::PDF> {
-    static void suggest() {
-        std::cout << "Open with PDF reader" << std::endl;
-    }
-};
-
-template<>
-struct FileOpener<FileType::Word> {
-    static void suggest() {
-        std::cout << "Open with word processor" << std::endl;
-    }
-};
-
-template<>
-struct FileOpener<FileType::PowerPoint> {
-    static void suggest() {
-        std::cout << "Open with image viewer" << std::endl;
-        std::string command = "libreoffice --impress ";
-        command += "/home/pes1ug21cs188/Desktop/Project/slides.odp"; 
+        std::string command = "xdg-open " + filename;
         int result = std::system(command.c_str());
         if (result != 0) {
             std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
@@ -138,8 +114,54 @@ struct FileOpener<FileType::PowerPoint> {
 };
 
 template<>
+struct FileOpener<FileType::Executable> {
+    static void suggest(const std::string& filename) {
+        std::cout << "Open with system's default program" << std::endl;
+    }
+};
+
+template<>
+struct FileOpener<FileType::PDF> {
+    static void suggest(const std::string& filename) {
+        char response;
+        std::cout << "Do you want to open with the Document viewer? (y/n): ";
+        std::cin >> response;
+        if (std::tolower(response) == 'y'){
+            std::string command = "evince " + filename;
+            int result = std::system(command.c_str());
+            if (result != 0) {
+                std::cerr << "Error: Failed to open the pdf file." << std::endl;
+            }
+        }
+    }
+};
+
+template<>
+struct FileOpener<FileType::Word> {
+    static void suggest(const std::string& filename) {
+        std::cout << "Open with word processor" << std::endl;
+    }
+};
+
+template<>
+struct FileOpener<FileType::PowerPoint> {
+    static void suggest(const std::string& filename) {
+        char response;
+        std::cout << "Do you want to open with the LibreOffice? (y/n): ";
+        std::cin >> response;
+        if (std::tolower(response) == 'y'){
+            std::string command = "libreoffice --impress " + filename;
+            int result = std::system(command.c_str());
+            if (result != 0) {
+                std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
+            }
+        }
+    }
+};
+
+template<>
 struct FileOpener<FileType::Excel> {
-    static void suggest() {
+    static void suggest(const std::string& filename) {
         std::cout << "Open with spreadsheet software" << std::endl;
     }
 };
@@ -150,28 +172,28 @@ void analyze_file(const std::string& filename) {
     FileType type = FileTypeDetector<T>::detect(filename);
     switch (type) {
         case FileType::Archive:
-            FileOpener<FileType::Archive>::suggest();
+            FileOpener<FileType::Archive>::suggest(filename);
             break;
         case FileType::Image:
-            FileOpener<FileType::Image>::suggest();
+            FileOpener<FileType::Image>::suggest(filename);
             break;
         case FileType::Audio:
-            FileOpener<FileType::Audio>::suggest();
+            FileOpener<FileType::Audio>::suggest(filename);
             break;
         case FileType::Executable:
-            FileOpener<FileType::Executable>::suggest();
+            FileOpener<FileType::Executable>::suggest(filename);
             break;
         case FileType::PDF:
-            FileOpener<FileType::PDF>::suggest();
+            FileOpener<FileType::PDF>::suggest(filename);
             break;
         case FileType::Word:
-            FileOpener<FileType::Word>::suggest();
+            FileOpener<FileType::Word>::suggest(filename);
             break;
         case FileType::PowerPoint:
-            FileOpener<FileType::PowerPoint>::suggest();
+            FileOpener<FileType::PowerPoint>::suggest(filename);
             break;
         case FileType::Excel:
-            FileOpener<FileType::Excel>::suggest();
+            FileOpener<FileType::Excel>::suggest(filename);
             break;
         default:
             std::cout << "Unknown file type" << std::endl;
@@ -179,18 +201,14 @@ void analyze_file(const std::string& filename) {
     }
 }
 
-int main() {
-    // analyze_file<std::ifstream>("example.txt");
-    analyze_file<std::ifstream>("/home/pes1ug21cs188/Desktop/Project/image1");
-    // analyze_file<std::ifstream>("example.mp3");
-    // analyze_file<std::ifstream>("example.zip");
-     //analyze_file<std::ifstream>("/home/pes1ug21cs188/Desktop/Project/video.mp4");
-    // analyze_file<std::ifstream>("/Users/diyam1/Desktop/GP/Project/ex1.png");
-    // analyze_file<std::ifstream>("example.mov");
-    // analyze_file<std::ifstream>("example.exe");
-    // analyze_file<std::ifstream>("example.pdf");
-    // analyze_file<std::ifstream>("example.docx");
-    //analyze_file<std::ifstream>("/home/pes1ug21cs188/Desktop/Project/slides.odp");
-    // analyze_file<std::ifstream>("example.xlsx");
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl;
+        return 1;
+    }
+
+    std::string filename = argv[1];
+    analyze_file<std::ifstream>(filename);
+
     return 0;
 }
