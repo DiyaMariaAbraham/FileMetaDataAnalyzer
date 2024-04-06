@@ -52,7 +52,7 @@ struct FileTypeDetector<std::ifstream> {
             return FileType::Archive; // ZIP file
         else if (magic_number[0] == '\xFF' && magic_number[1] == '\xD8' && magic_number[2] == '\xFF')
             return FileType::Image; // JPEG file
-        else if (magic_number[0] == '\x49' && magic_number[1] == '\x44' && magic_number[2] == '\x33' && magic_number[3] == '\x03')
+        else if (magic_number[0] == '\x49' && magic_number[1] == '\x44' && magic_number[2] == '\x33' && magic_number[3] == '\x04')
             return FileType::Audio; // MP3 file
         else if (magic_number[0] == '\x66' && magic_number[1] == '\x74' && magic_number[2] == '\x79' && magic_number[3] == '\x70')
             return FileType::Audio; // MP4 file
@@ -105,10 +105,15 @@ template<>
 struct FileOpener<FileType::Audio> {
     static void suggest(const std::string& filename) {
         std::cout << "Open with media player" << std::endl;
-        std::string command = "xdg-open " + filename;
-        int result = std::system(command.c_str());
-        if (result != 0) {
-            std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
+        char response;
+        std::cout << "Do you want to open with the Videos? (y/n): ";
+        std::cin >> response;
+        if (std::tolower(response) == 'y'){
+            std::string command = "totem " + filename;
+            int result = std::system(command.c_str());
+            if (result != 0) {
+                std::cerr << "Error: Failed to open the audio file." << std::endl;
+            }
         }
     }
 };
@@ -153,7 +158,7 @@ struct FileOpener<FileType::PowerPoint> {
             std::string command = "libreoffice --impress " + filename;
             int result = std::system(command.c_str());
             if (result != 0) {
-                std::cerr << "Error: Failed to open the image file with Preview." << std::endl;
+                std::cerr << "Error: Failed to open the powerpoint file." << std::endl;
             }
         }
     }
