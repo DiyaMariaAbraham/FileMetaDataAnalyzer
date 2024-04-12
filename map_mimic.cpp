@@ -12,7 +12,7 @@ struct element{
 
 
 template <typename T, typename U>
-class map{
+class Map{
     private:
         vector<element<T, U>> elements;
         int len;
@@ -84,9 +84,10 @@ class map{
 
 
 
+/*
 // main function for <int , string> map
 int main() {
-    map<int, string> myMap;
+    Map<int, string> myMap;
 
     // Insert some elements
     myMap.insert(1, "One");
@@ -138,3 +139,4 @@ int main() {
 
     return 0;
 }
+*/
