@@ -10,7 +10,7 @@ protected:
 	command = "xdg-open " + filename;
 	App = "Image Viewer";
 private:
-    Map<std::string, std::string> fileMarkers;
+    static Map<std::string, std::string> fileMarkers;
 public:
     JPGFile(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","FFD8");

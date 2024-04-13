@@ -9,11 +9,7 @@ protected:
 	magicNumber = "";
 	command= "gedit " + filename;
 	App = "gedit";
-private:
-    Map<std::string, std::string> fileMarkers;
 public:
-    TextFile(const std::string& filename) : File(filename){}
-
     FileType getType() const override {
         return FileType::Text;
     }

@@ -10,7 +10,7 @@ protected:
 	command = "rhythmbox " + filename;
 	App = "RhythmBox";
 private:
-    Map<std::string, std::string> fileMarkers;
+    static Map<std::string, std::string> fileMarkers;
 public:
     MP3File(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","494433");

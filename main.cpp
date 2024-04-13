@@ -13,18 +13,15 @@
 #include "PDFFile.h"
 
 int main(int argc, char *argv[]) {
-    // Check if a command-line argument is provided
-    if (argc != 2) {
-        // Prompt the user with usage instructions
-        std::cerr << "Usage: " << argv[0] << " <full_absolute_filepath>" << std::endl;
-        std::cerr << "Please provide the full absolute filepath as a command line argument." << std::endl;
+    // Check if no command-line arguments are provided
+    if (argc < 2) {
+        // Prompt the user with correct usage instructions
+        std::cerr << "Usage: " << argv[0] << " <absolute_file_path1> <absolute_file_path2> ..." << std::endl;
+        std::cerr << "Please provide at least one absolute file path as a command-line argument." << std::endl;
         return 1; // Exit with error code 1
     }
 
-    // Extract the filename from the command-line argument
-    std::string filename = argv[1];
-
-    // Proceed with further processing using the filename...
+    
     
     return 0;
 }

@@ -10,7 +10,7 @@ protected:
 	command = "xdg-open " + filename;
 	App = "Default Video Player";
 private:
-    Map<std::string, std::string> fileMarkers;
+    static Map<std::string, std::string> fileMarkers;
 public:
     MP4File(const std::string& filename) : File(filename) {
     	fileMarkers.insert("EOF","0000002066747970");

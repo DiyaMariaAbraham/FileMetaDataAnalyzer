@@ -12,9 +12,9 @@ enum class FileType;
 
 class File {
 protected:
-    std::string magicNumber;
+    static std::string magicNumber;
     std::string filename;
-    std::string App;
+    static std::string App;
     std::string command;
     size_t size;
 

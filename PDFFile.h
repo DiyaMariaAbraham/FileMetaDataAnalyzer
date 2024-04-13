@@ -10,7 +10,7 @@ protected:
 	command = "evince " + filename;
 	App = "Document Viewer";
 private:
-    Map<std::string, std::string> fileMarkers;
+    static Map<std::string, std::string> fileMarkers;
 public:
     PDFFile(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","25504446");
