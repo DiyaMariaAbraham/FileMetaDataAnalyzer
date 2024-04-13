@@ -4,11 +4,11 @@
 
 #include "File.h"
 
-class JPGFile : public File {
+class JPG : public File {
 protected:
 	magicNumber = "FFD8FF";
-	command = "eog " + filename;
-	App = "Preview";
+	command = "xdg-open " + filename;
+	App = "Image Viewer";
 private:
     Map<std::string, std::string> fileMarkers;
 public:

@@ -4,7 +4,7 @@
 
 #include "File.h"
 
-class TextFile : public File {
+class Text : public File {
 protected:
 	magicNumber = "";
 	command= "gedit " + filename;

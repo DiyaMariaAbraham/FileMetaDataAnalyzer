@@ -101,9 +101,8 @@ struct FileOpener<FileType::Image> {
 template<>
 struct FileOpener<FileType::Audio> {
     static void suggest(const std::string& filename) {
-        std::cout << "Open with media player" << std::endl;
+        std::cout << "Open with media player? (y/n)" << std::endl;
         char response;
-        std::cout << "Do you want to open with the Videos? (y/n): ";
         std::cin >> response;
         if (std::tolower(response) == 'y'){
             std::string command = "totem " + filename;
