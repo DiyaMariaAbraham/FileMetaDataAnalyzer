@@ -1,6 +1,7 @@
 // main.cpp
 
-
+#include <sstream>
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -20,7 +21,8 @@ enum class FileType {
     MP3,
     MP4,
     ZIP,
-    PDF
+    PDF,
+    Count // Special enum member to represent the count of file types
 };
 
 class File {
@@ -298,19 +300,202 @@ Map<std::string, std::string> ZIP::fileMarkers;
 
 std::vector<std::string> files;
 
-class FileScorer{
+class FileScorer {
 public:
-	static void initializer(){
-	BMP::initialize();
-	JPG::initialize();
-    	MP3::initialize();
-    	MP4::initialize();
-    	PDF::initialize();
-	PNG::initialize();
-    	Text::initialize();
-	ZIP::initialize();
+    static void initializer(){
+        BMP::initialize();
+        JPG::initialize();
+        MP3::initialize();
+        MP4::initialize();
+        PDF::initialize();
+        PNG::initialize();
+        Text::initialize();
+        ZIP::initialize();
+    }
+
+
+    // Modify the score function
+    static void score(const std::string& filename) {
+        std::ifstream file(filename, std::ios::binary);
+        if (!file.is_open()) {
+            std::cerr << "Error: Unable to open file: " << filename << std::endl;
+            return;
+        }
+
+        std::cout << "Scoring file: " << filename << std::endl;
+
+        // Array to store scores for each file type
+        int scores[static_cast<int>(FileType::Count)] = {0};
+
+        // Read the first few bytes to match magic numbers
+        const int maxMagicNumberLength = getMaxMagicNumberLength();
+        char magicNumberBuffer[maxMagicNumberLength] = {0};
+        file.read(magicNumberBuffer, maxMagicNumberLength);
+
+        // Check magic numbers and update scores
+        for (int i = 0; i < static_cast<int>(FileType::Count); ++i) {
+            FileType type = static_cast<FileType>(i);
+            std::string magicNumber = getMagicNumber(type);
+            int magicNumberLength = magicNumber.length();
+            std::string bufferHex = "";
+            for (int j = 0; j < magicNumberLength; ++j) {
+                bufferHex += byteToHexString(magicNumberBuffer[j]);
+            }
+            bufferHex = bufferHex.substr(0, (magicNumber.size()/2)*2);
+            if (magicNumberLength > 0 &&
+                magicNumberLength <= maxMagicNumberLength &&
+                bufferHex == magicNumber) {
+                scores[i] += 200;
+            }
+        }
+
+        // Reset file position to beginning
+        file.seekg(0);
+	/*
+        // Get the total size of the file
+	file.seekg(0, std::ios::end);
+	std::streampos fileSize = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	// Initialize variables for tracking progress
+	long long bytesProcessed = 0;
+	int lastPercentage = -1;
+
+	// Loop until end of file
+	while (file.peek() != EOF) {
+	    // Display progress percentage
+	    bytesProcessed = file.tellg();
+	    int currentPercentage = static_cast<int>((bytesProcessed * 100) / fileSize);
+	    if (currentPercentage != lastPercentage) {
+		std::cout << "Progress: " << currentPercentage << "%" << std::endl;
+		lastPercentage = currentPercentage;
+	    }
+
+	    // Perform marker checks
+	    checkMarker(file, PNG::fileMarkers, scores, FileType::PNG);
+	    checkMarker(file, JPG::fileMarkers, scores, FileType::JPG);
+	    checkMarker(file, BMP::fileMarkers, scores, FileType::BMP);
+	    checkMarker(file, MP3::fileMarkers, scores, FileType::MP3);
+	    checkMarker(file, MP4::fileMarkers, scores, FileType::MP4);
+	    checkMarker(file, ZIP::fileMarkers, scores, FileType::ZIP);
+	    checkMarker(file, PDF::fileMarkers, scores, FileType::PDF);
 	}
+	*/
 	
+	char byte;
+
+        while (file.get(byte)) {
+            std::string byteStr(1, byte); // Convert char to string
+            checkMarker(byteStr, PNG::fileMarkers, scores, FileType::PNG);
+            checkMarker(byteStr, JPG::fileMarkers, scores, FileType::JPG);
+            checkMarker(byteStr, BMP::fileMarkers, scores, FileType::BMP);
+            checkMarker(byteStr, MP3::fileMarkers, scores, FileType::MP3);
+            checkMarker(byteStr, MP4::fileMarkers, scores, FileType::MP4);
+            checkMarker(byteStr, ZIP::fileMarkers, scores, FileType::ZIP);
+            checkMarker(byteStr, PDF::fileMarkers, scores, FileType::PDF);
+        }
+
+
+        // Print scores
+        for (int i = 0; i < static_cast<int>(FileType::Count); ++i) {
+            std::cout << "Score for " << getFileTypeName(static_cast<FileType>(i)) << ": " << scores[i] << std::endl;
+        }
+
+        file.close();
+    }
+
+private:
+    // Helper function to convert byte to hexadecimal string
+    static std::string byteToHexString(unsigned char byte) {
+        std::stringstream ss;
+        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+        return ss.str();
+    }
+
+    //checkMarker function
+    /*
+    static void checkMarker(std::ifstream& file, const Map<std::string, std::string>& markers, int scores[], FileType type) {
+    std::streampos originalPos = file.tellg(); // Save original file position
+    for (auto it = markers.begin(); it != markers.end(); it++) {
+        std::string marker = (*it).value;
+        int markerLength = marker.length();
+        std::string bufferHex;
+        char byte;
+        bool match = true;
+        for (int j = 0; j < markerLength; ++j) {
+            if (!file.get(byte)) {
+                match = false; // Unable to read enough bytes from the file
+                break;
+            }
+            bufferHex += byteToHexString(byte);
+        }
+        bufferHex = bufferHex.substr(0, (marker.size()/2)*2);
+        //std::cout<<"Marker:"<<marker<<"\t"<<"buffer:"<<bufferHex<<std::endl;
+        if (match && bufferHex == marker) {
+            scores[static_cast<int>(type)]++;
+            break; // Exit loop after the first match
+        }
+        // Move the file pointer back to its original position
+        file.seekg(originalPos);
+    }
+}
+*/
+
+	static void checkMarker(const std::string& byte, const Map<std::string, std::string>& markers, int scores[], FileType type) {
+	    for (auto it = markers.begin(); it != markers.end(); it++) {
+		std::string marker = (*it).value;
+		int markerLength = marker.length();
+		std::string bufferHex = "";
+		for (int j = 0; j < markerLength; ++j) {
+		    bufferHex += byteToHexString(marker[j]);
+		}
+		bufferHex = bufferHex.substr(0, (markerLength / 2) * 2);
+		std::string byteHex = byteToHexString(byte[0]);
+		if (bufferHex.find(byteHex) != std::string::npos) {
+		    scores[static_cast<int>(type)]++;
+		    break; // Exit loop after the first match
+		}
+	    }
+	}
+
+
+
+    static std::string getFileTypeName(FileType type) {
+        switch (type) {
+            case FileType::PNG: return "PNG";
+            case FileType::JPG: return "JPG";
+            case FileType::BMP: return "BMP";
+            case FileType::MP3: return "MP3";
+            case FileType::MP4: return "MP4";
+            case FileType::ZIP: return "ZIP";
+            case FileType::PDF: return "PDF";
+            default: return "Unknown";
+        }
+    }
+
+    static std::string getMagicNumber(FileType type) {
+        switch (type) {
+            case FileType::PNG: return PNG::magicNumber;
+            case FileType::JPG: return JPG::magicNumber;
+            case FileType::BMP: return BMP::magicNumber;
+            case FileType::MP3: return MP3::magicNumber;
+            case FileType::MP4: return MP4::magicNumber;
+            case FileType::ZIP: return ZIP::magicNumber;
+            case FileType::PDF: return PDF::magicNumber;
+            default: return ""; // No magic number for other file types
+        }
+    }
+
+    static int getMaxMagicNumberLength() {
+        // Get the maximum magic number length among all supported file types
+        int maxMagicNumberLength = 0;
+        maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(PNG::magicNumber.length()));
+        maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(JPG::magicNumber.length()));
+        maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(BMP::magicNumber.length()));
+        maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(ZIP::magicNumber.length()));
+        maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(PDF::magicNumber.length()));
+        return maxMagicNumberLength;
+    }
 };
 
 // Function to check if a file exists
@@ -370,7 +555,9 @@ int main(int argc, char *argv[]) {
     // Filter the files
     processArgs(args);
 
-
+    for(auto &i : files){
+    	FileScorer::score(i);
+    }
     return 0;
 }
 

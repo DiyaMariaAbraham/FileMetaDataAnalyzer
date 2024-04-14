@@ -17,6 +17,43 @@ class Map{
         vector<element<T, U>> elements;
         int len;
     public:
+    
+    class iterator {
+	private:
+	    typename vector<element<T, U>>::const_iterator current;
+
+	public:
+	    iterator(typename vector<element<T, U>>::const_iterator it) : current(it) {}
+
+	    iterator& operator++() {
+		++current;
+		return *this;
+	    }
+
+	    iterator operator++(int) {
+		iterator temp = *this;
+		++(*this);
+		return temp;
+	    }
+
+	    element<T, U> const& operator*() const {
+		    return *current;
+            }
+
+
+	    bool operator!=(const iterator& other) const {
+		return current != other.current;
+	    }
+    };
+
+
+    iterator begin() const {
+        return iterator(elements.begin());
+    }
+
+    iterator end() const {
+        return iterator(elements.end());
+    }
         void insert(T a, U b){
             element<T, U> new_element;
             new_element.key = a;
