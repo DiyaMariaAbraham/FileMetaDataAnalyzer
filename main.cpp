@@ -1,6 +1,7 @@
 // main.cpp
 
 #include <sstream>
+#include <type_traits>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -38,6 +39,7 @@ public:
         if (file.is_open()) {
         	command = "xdg-open "+filename;
             size = file.tellg(); // Get the current position, which is the file size
+            std::cout << "File Size:" << size << "(in bytes)" << std::endl;
             file.close();
         } else {
             // Handle error if the file cannot be opened
@@ -62,6 +64,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     BMP(const std::string& filename) : File(filename) {
     }
@@ -88,6 +92,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     JPG(const std::string& filename) : File(filename) {
    
@@ -121,6 +127,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     MP3(const std::string& filename) : File(filename) {
  
@@ -152,6 +160,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     MP4(const std::string& filename) : File(filename) {
     	
@@ -180,6 +190,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     PDF(const std::string& filename) : File(filename) {
     	
@@ -211,6 +223,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     PNG(const std::string& filename) : File(filename) {
     	
@@ -245,6 +259,8 @@ private:
 	static std::string magicNumber;
 	static std::string App;
 	friend class FileScorer;
+	template<typename T, typename>
+	friend class FileProcessor;
 public:
     Text(const std::string& filename) : File(filename) {
     	
@@ -270,6 +286,8 @@ private:
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
     friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
 public:
     ZIP(const std::string& filename) : File(filename) {
     
@@ -300,6 +318,85 @@ Map<std::string, std::string> ZIP::fileMarkers;
 
 std::vector<std::string> files;
 
+
+template<typename T, typename = std::enable_if_t<std::is_base_of_v<File, T>>>
+class FileProcessor {
+public:
+    // Constructor
+    FileProcessor() {}
+
+    // Process method
+    static void Process(T& file) {
+        // Process the file using a generic lambda
+        auto processFile = [](auto&& file) {
+            std::cout << "Open file with " << file.App << "? (y/n): ";
+            char a;
+            std::cin >> a;
+            if(a=='y' || a=='Y'){
+            	file.openApplication();
+            }
+            else return;
+	};
+        // Call the generic lambda to process the file
+        processFile(std::forward<T>(file));
+    }
+};
+
+
+// Define FileTypeTrait to determine if a type is a subclass of File
+template<typename T>
+struct FileTypeTrait {
+    static constexpr bool value = std::is_base_of<File, T>::value;
+};
+
+
+
+// Define the FileTypeToFile template
+template <FileType FileTypeValue>
+struct FileTypeToFile;
+
+// Specialization of FileTypeToFile template for each FileType value
+template <>
+struct FileTypeToFile<FileType::Text> {
+    using type = Text;
+};
+
+template <>
+struct FileTypeToFile<FileType::PNG> {
+    using type = PNG;
+};
+
+template <>
+struct FileTypeToFile<FileType::JPG> {
+    using type = JPG;
+};
+
+template <>
+struct FileTypeToFile<FileType::BMP> {
+    using type = BMP;
+};
+
+template <>
+struct FileTypeToFile<FileType::MP3> {
+    using type = MP3;
+};
+
+template <>
+struct FileTypeToFile<FileType::MP4> {
+    using type = MP4;
+};
+
+template <>
+struct FileTypeToFile<FileType::ZIP> {
+    using type = ZIP;
+};
+
+template <>
+struct FileTypeToFile<FileType::PDF> {
+    using type = PDF;
+};
+
+
 class FileScorer {
 public:
     static void initializer(){
@@ -312,9 +409,20 @@ public:
         Text::initialize();
         ZIP::initialize();
     }
-
-
-    // Modify the score function
+    
+	template<typename... Types>
+	    static FileType getMaxScoredFileType(int (&scores)[static_cast<int>(FileType::Count)]) {
+		FileType maxType = FileType::PNG; // Initialize with a default value
+		int maxScore = -1;
+		for (int i = 0; i < static_cast<int>(FileType::Count); ++i) {
+		    if (scores[i] > maxScore) {
+		        maxScore = scores[i];
+		        maxType = static_cast<FileType>(i);
+		    }
+		}
+		return maxType;
+	    }
+    // Scoring Algorithm
     static void score(const std::string& filename) {
         std::ifstream file(filename, std::ios::binary);
         if (!file.is_open()) {
@@ -402,8 +510,49 @@ public:
         }
 
         file.close();
-    }
+        
+    // Get the FileType with the maximum score
+    FileType maxScoredType = getMaxScoredFileType(scores);
 
+    // Create an object of the appropriate class based on the FileType
+    switch (maxScoredType) {
+        case FileType::PNG:{
+            PNG pngFile(filename);
+            FileProcessor<PNG>::Process(pngFile);
+            break;
+            }
+        case FileType::JPG:{
+            JPG jpgFile(filename);
+            FileProcessor<JPG>::Process(jpgFile);
+            break;
+            }
+        case FileType::BMP:{
+            BMP bmpFile(filename);
+            FileProcessor<BMP>::Process(bmpFile);
+            break;
+            }
+        case FileType::MP3:{
+            MP3 mp3File(filename);
+            FileProcessor<MP3>::Process(mp3File);
+            break;
+            }
+        case FileType::MP4:{
+            MP4 mp4File(filename);
+            FileProcessor<MP4>::Process(mp4File);
+            break;
+            }
+        case FileType::ZIP:{
+            ZIP zipFile(filename);
+            FileProcessor<ZIP>::Process(zipFile);
+            break;
+            }
+        case FileType::PDF:{
+            PDF pdfFile(filename);
+            FileProcessor<PDF>::Process(pdfFile);
+            break;
+            }
+    }
+}
 private:
     // Helper function to convert byte to hexadecimal string
     static std::string byteToHexString(unsigned char byte) {
