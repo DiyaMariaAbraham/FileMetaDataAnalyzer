@@ -9,10 +9,10 @@ protected:
 private:
 	static std::string magicNumber;
 	static std::string App;
+	friend class FileScorer;
 public:
     Text(const std::string& filename) : File(filename) {
-    	App = "gedit";
-    	magicNumber = "";
+    	
     }
     FileType getType() const override {
         return FileType::Text;

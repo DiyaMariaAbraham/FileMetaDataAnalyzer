@@ -11,6 +11,7 @@
 enum class FileType;
 
 class File {
+private:
 protected:
 	std::string filename;
     std::string command;

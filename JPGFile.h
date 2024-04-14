@@ -10,14 +10,10 @@ private:
 	static std::string magicNumber;
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
+    friend class FileScorer;
 public:
     JPG(const std::string& filename) : File(filename) {
-    	fileMarkers.insert("SOF","FFD8");
-    	fileMarkers.insert("EOF","FFD9");
-    	fileMarkers.insert("APP12","FFEC");
-    	fileMarkers.insert("COM","FFFE");
-    	App = "Image Viewer";
-    	magicNumber = "FFD8FF";
+   
     }
 
     FileType getType() const override {

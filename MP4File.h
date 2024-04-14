@@ -10,11 +10,10 @@ private:
 	static std::string magicNumber;
 	static std::string App;
     static Map<std::string, std::string> fileMarkers;
+    friend class FileScorer;
 public:
     MP4(const std::string& filename) : File(filename) {
-    	fileMarkers.insert("EOF","0000002066747970");
-    	App = "Default Video Player";
-    	magicNumber = "0000002066747970";
+    	
     }
 
     FileType getType() const override {
