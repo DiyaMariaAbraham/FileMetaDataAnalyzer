@@ -12,27 +12,26 @@ enum class FileType;
 
 class File {
 protected:
-    static std::string magicNumber;
-    std::string filename;
-    static std::string App;
+	std::string filename;
     std::string command;
     size_t size;
 
 public:
     File(const std::string& filename) : filename(filename){
-    	std::ifstream file(filename, std::ios::binary | std::ios::ate);
+        std::ifstream file(filename, std::ios::binary | std::ios::ate);
         if (file.is_open()) {
+        	command = "xdg-open "+filename;
             size = file.tellg(); // Get the current position, which is the file size
             file.close();
         } else {
             // Handle error if the file cannot be opened
-            throw std::runtime_error("Unable to open file: " + filename);
+            throw std::runtime_error("Unable to retrieve file size: " + filename);
         }
     }
 
     virtual FileType getType() const = 0;
-    virtual void openApplication() const{
-    	std::system(command.c_str());
+    virtual void openApplication() const {
+        std::system(command.c_str());
     }
 
     size_t getSize() const { return size; }
@@ -40,3 +39,4 @@ public:
 };
 
 #endif /* FILE_H */
+

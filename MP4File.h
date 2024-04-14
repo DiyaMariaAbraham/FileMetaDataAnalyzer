@@ -6,14 +6,15 @@
 
 class MP4 : public File {
 protected:
-	magicNumber = "0000002066747970";
-	command = "xdg-open " + filename;
-	App = "Default Video Player";
 private:
+	static std::string magicNumber;
+	static std::string App;
     static Map<std::string, std::string> fileMarkers;
 public:
-    MP4File(const std::string& filename) : File(filename) {
+    MP4(const std::string& filename) : File(filename) {
     	fileMarkers.insert("EOF","0000002066747970");
+    	App = "Default Video Player";
+    	magicNumber = "0000002066747970";
     }
 
     FileType getType() const override {

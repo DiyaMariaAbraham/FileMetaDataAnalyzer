@@ -6,14 +6,15 @@
 
 class MP3 : public File {
 protected:
-	magicNumber = "494433";
-	command = "rhythmbox " + filename;
-	App = "RhythmBox";
 private:
+	static std::string magicNumber;
+	static std::string App;
     static Map<std::string, std::string> fileMarkers;
 public:
-    MP3File(const std::string& filename) : File(filename) {
+    MP3(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","494433");
+    	App = "RhythmBox";
+    	magicNumber = "494433";
     }
 
     FileType getType() const override {

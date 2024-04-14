@@ -6,10 +6,14 @@
 
 class Text : public File {
 protected:
-	magicNumber = "";
-	command= "gedit " + filename;
-	App = "gedit";
+private:
+	static std::string magicNumber;
+	static std::string App;
 public:
+    Text(const std::string& filename) : File(filename) {
+    	App = "gedit";
+    	magicNumber = "";
+    }
     FileType getType() const override {
         return FileType::Text;
     }

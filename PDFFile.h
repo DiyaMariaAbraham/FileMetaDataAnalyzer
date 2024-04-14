@@ -6,15 +6,16 @@
 
 class PDF : public File {
 protected:
-	magicNumber = "25504446";
-	command = "evince " + filename;
-	App = "Document Viewer";
 private:
+	static std::string magicNumber;
+	static std::string App;
     static Map<std::string, std::string> fileMarkers;
 public:
-    PDFFile(const std::string& filename) : File(filename) {
+    PDF(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","25504446");
     	fileMarkers.insert("EOF","2525454F46");
+    	App = "Document Viewer";
+    	magicNumber = "25504446";
     }
 
     FileType getType() const override {

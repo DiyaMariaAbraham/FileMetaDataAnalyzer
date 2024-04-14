@@ -6,17 +6,18 @@
 
 class JPG : public File {
 protected:
-	magicNumber = "FFD8FF";
-	command = "xdg-open " + filename;
-	App = "Image Viewer";
 private:
+	static std::string magicNumber;
+	static std::string App;
     static Map<std::string, std::string> fileMarkers;
 public:
-    JPGFile(const std::string& filename) : File(filename) {
+    JPG(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","FFD8");
     	fileMarkers.insert("EOF","FFD9");
     	fileMarkers.insert("APP12","FFEC");
     	fileMarkers.insert("COM","FFFE");
+    	App = "Image Viewer";
+    	magicNumber = "FFD8FF";
     }
 
     FileType getType() const override {

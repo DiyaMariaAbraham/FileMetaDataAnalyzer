@@ -6,14 +6,15 @@
 
 class BMP : public File {
 protected:
-	magicNumber = "424d";
-	command = "xdg-open " + filename;
-	App = "Image Viewer";
 private:
+	static std::string magicNumber;
+	static std::string App;
     static Map<std::string, std::string> fileMarkers;
 public:
-    BMPFile(const std::string& filename) : File(filename) {
+    BMP(const std::string& filename) : File(filename) {
     	fileMarkers.insert("SOF","424d");
+    	magicNumber = "424d";
+    	App = "Image Viewer";
     }
 
     FileType getType() const override {
