@@ -23,6 +23,7 @@ enum class FileType {
     MP4,
     ZIP,
     PDF,
+    HTML,
     Count // Special enum member to represent the count of file types
 };
 
@@ -37,7 +38,7 @@ public:
     File(const std::string& filename) : filename(filename){
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
         if (file.is_open()) {
-        	command = "xdg-open "+filename;
+        	//command = "xdg-open "+filename;
             size = file.tellg(); // Get the current position, which is the file size
             std::cout << "File Size:" << size << "(in bytes)" << std::endl;
             file.close();
@@ -47,10 +48,15 @@ public:
         }
     }
 
+    /*
     virtual FileType getType() const = 0;
     virtual void openApplication() const {
         std::system(command.c_str());
     }
+    */
+    virtual FileType getType() const = 0;
+    virtual void openApplication() const = 0;
+    
 
     size_t getSize() const { return size; }
 
@@ -76,6 +82,11 @@ public:
     }
     FileType getType() const override {
         return FileType::BMP;
+    }
+    
+    void openApplication() const override {
+        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
     }
 
 };
@@ -116,6 +127,11 @@ public:
     FileType getType() const override {
         return FileType::JPG;
     }
+    
+    void openApplication() const override {
+        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
+    }
 
 };
 
@@ -147,6 +163,11 @@ public:
     }
     FileType getType() const override {
         return FileType::MP3;
+    }
+    
+    void openApplication() const override {
+        std::string command = "totem " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
     }
 
 };
@@ -181,6 +202,11 @@ public:
     FileType getType() const override {
         return FileType::MP4;
     }
+    
+    void openApplication() const override {
+        std::string command = "totem " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
+    }
 
 };
 std::string MP4::magicNumber;
@@ -212,6 +238,11 @@ public:
     }
     FileType getType() const override {
         return FileType::PDF;
+    }
+    
+    void openApplication() const override {
+        std::string command = "evince " + filename; // Command to open with Documert Viewer
+        std::system(command.c_str());
     }
 
 };
@@ -252,6 +283,11 @@ public:
     FileType getType() const override {
         return FileType::PNG;
     }
+    
+    void openApplication() const override {
+        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
+    }
 };
 std::string PNG::magicNumber;
 std::string PNG::App;
@@ -277,6 +313,11 @@ public:
     }
     FileType getType() const override {
         return FileType::Text;
+    }
+    
+    void openApplication() const override {
+        std::string command = "nano " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
     }
 
 };
@@ -313,6 +354,11 @@ public:
     FileType getType() const override {
         return FileType::ZIP;
     }
+    
+    void openApplication() const override {
+        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
+    }
 
 };
 std::string ZIP::magicNumber;
@@ -321,6 +367,46 @@ Map<std::string, std::string> ZIP::fileMarkers;
 
 
 std::vector<std::string> files;
+
+class HTML : public File {
+protected:
+private:
+	static std::string magicNumber;
+	static std::string App;
+    static Map<std::string, std::string> fileMarkers;
+    friend class FileScorer;
+    template<typename T, typename>
+    friend class FileProcessor;
+public:
+    HTML(const std::string& filename) : File(filename) {
+   
+    }
+    static void initialize(){
+	fileMarkers.insert("SOF","3c68746d");
+  	fileMarkers.insert("/html","3c2f68746d6c3e");
+
+    	fileMarkers.insert("body","3c626f64793e");
+
+    	fileMarkers.insert("/body","3c2f626f64793e");
+
+    	App = "Vim Editor";
+    	magicNumber = "3c68746d";
+    }
+    FileType getType() const override {
+        return FileType::HTML;
+    }
+    
+    void openApplication() const override {
+        std::string command = "firefox " + filename; // Command to open with Eye of GNOME (eog)
+        std::system(command.c_str());
+    }
+
+};
+
+std::string HTML::magicNumber;
+std::string HTML::App;
+Map<std::string, std::string> HTML::fileMarkers;
+
 
 
 template<typename T, typename = std::enable_if_t<std::is_base_of_v<File, T>>>
@@ -400,6 +486,11 @@ struct FileTypeToFile<FileType::PDF> {
     using type = PDF;
 };
 
+template <>
+struct FileTypeToFile<FileType::HTML> {
+    using type = HTML;
+};
+
 
 class FileScorer {
 public:
@@ -412,6 +503,7 @@ public:
         PNG::initialize();
         Text::initialize();
         ZIP::initialize();
+        HTML::initialize();
     }
     
 	template<typename... Types>
@@ -474,6 +566,7 @@ public:
 	    checkMarker(file, MP4::fileMarkers, scores, FileType::MP4);
 	    checkMarker(file, ZIP::fileMarkers, scores, FileType::ZIP);
 	    checkMarker(file, PDF::fileMarkers, scores, FileType::PDF);
+	    checkMarker(file, HTML::fileMarkers, scores, FileType::HTML);
 	    // Move the file pointer ahead by 1 byte
     		file.seekg(1, std::ios_base::cur);
 	}
@@ -540,6 +633,11 @@ public:
         case FileType::PDF:{
             PDF pdfFile(filename);
             FileProcessor<PDF>::Process(pdfFile);
+            break;
+            }    
+        case FileType::HTML:{
+            HTML htmlFile(filename);
+            FileProcessor<HTML>::Process(htmlFile);
             break;
             }
     }
@@ -609,6 +707,7 @@ private:
             case FileType::MP4: return "MP4";
             case FileType::ZIP: return "ZIP";
             case FileType::PDF: return "PDF";
+            case FileType::HTML: return "HTML";
             default: return "Unknown";
         }
     }
@@ -622,6 +721,7 @@ private:
             case FileType::MP4: return MP4::magicNumber;
             case FileType::ZIP: return ZIP::magicNumber;
             case FileType::PDF: return PDF::magicNumber;
+            case FileType::HTML: return HTML::magicNumber;
             default: return ""; // No magic number for other file types
         }
     }
@@ -634,6 +734,7 @@ private:
         maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(BMP::magicNumber.length()));
         maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(ZIP::magicNumber.length()));
         maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(PDF::magicNumber.length()));
+        maxMagicNumberLength = std::max(maxMagicNumberLength, static_cast<int>(HTML::magicNumber.length()));
         return maxMagicNumberLength;
     }
 };
@@ -700,4 +801,3 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
-
