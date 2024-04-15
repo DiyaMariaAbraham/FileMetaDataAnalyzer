@@ -1,4 +1,4 @@
-**File Metadata Analyzer**
+**File Metadata Analyzer** <br />
 The File Metadata Analyzer is a tool designed to determine file types by analyzing the headers of the files and comparing them with known file headers. This project supports the identification of the following file types: Text, PNG, JPG, BMP, MP3, MP4, ZIP, HTML, and PDF.
 
 *Features*
