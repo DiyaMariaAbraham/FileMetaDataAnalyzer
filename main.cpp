@@ -99,15 +99,19 @@ public:
    
     }
     static void initialize(){
-	fileMarkers.insert("SOF","FFD8");
-  	fileMarkers.insert("EOF","FFD9");
+	fileMarkers.insert("SOF","ffd8");
+  	fileMarkers.insert("EOF","ffd9");
 
-    	fileMarkers.insert("APP12","FFEC");
+    	fileMarkers.insert("APP12","ffec");
 
-    	fileMarkers.insert("COM","FFFE");
+    	fileMarkers.insert("COM","fffe");
+    	fileMarkers.insert("Start of Scan","ffda");
+    	fileMarkers.insert("Defining Huffman Table","ffc4");
+    	
+    	fileMarkers.insert("COM","fffe");
 
     	App = "Image Viewer";
-    	magicNumber = "FFD8FF";
+    	magicNumber = "ffd8";
     }
     FileType getType() const override {
         return FileType::JPG;
@@ -230,19 +234,19 @@ public:
     	
     }
     static void initialize(){
-    	fileMarkers.insert("SOF","89504E470D0A1A0A");
+    	fileMarkers.insert("SOF","89504e470d0a1a0a");
 
-    	fileMarkers.insert("EOF","49454E44");
+    	fileMarkers.insert("EOF","49454e44");
 
     	fileMarkers.insert("IHDR","49484452");
 
-    	fileMarkers.insert("PLTE","504C5445");
+    	fileMarkers.insert("PLTE","504c5445");
 
     	fileMarkers.insert("PLTE","49444154");
 
     	App = "Image Viewer";
 
-    	magicNumber = "89504E470D0A1A0A";
+    	magicNumber = "89504e470d0a1a0a";
 	
     }
     FileType getType() const override {
@@ -293,17 +297,17 @@ public:
     
     }
     static void initialize(){
-    	ZIP::fileMarkers.insert("SOF","504B0304");
+    	ZIP::fileMarkers.insert("SOF","504b0304");
 
-    	ZIP::fileMarkers.insert("EOF","504B0506");
+    	ZIP::fileMarkers.insert("EOF","504b0506");
 
-    	ZIP::fileMarkers.insert("Central Directory File Header","504B0102");
+    	ZIP::fileMarkers.insert("Central Directory File Header","504b0102");
 
-    	ZIP::fileMarkers.insert("Optional Data Descriptor","504B0708");
+    	ZIP::fileMarkers.insert("Optional Data Descriptor","504b0708");
 
     	ZIP::App = "Archive Manager";
 
-    	ZIP::magicNumber = "504B0304";
+    	ZIP::magicNumber = "504b0304";
 	
     }
     FileType getType() const override {
@@ -453,31 +457,14 @@ public:
             if (magicNumberLength > 0 &&
                 magicNumberLength <= maxMagicNumberLength &&
                 bufferHex == magicNumber) {
-                scores[i] += 200;
+                scores[i]++;
             }
         }
 
         // Reset file position to beginning
         file.seekg(0);
-	
-        // Get the total size of the file
-	file.seekg(0, std::ios::end);
-	std::streampos fileSize = file.tellg();
-	file.seekg(0, std::ios::beg);
 
-	// Initialize variables for tracking progress
-	long long bytesProcessed = 0;
-	int lastPercentage = -1;
-
-	// Loop until end of file
 	while (file.peek() != EOF) {
-	    // Display progress percentage
-	    bytesProcessed = file.tellg();
-	    int currentPercentage = static_cast<int>((bytesProcessed * 100) / fileSize);
-	    if (currentPercentage != lastPercentage) {
-		std::cout << "Progress: " << currentPercentage << "%" << std::endl;
-		lastPercentage = currentPercentage;
-	    }
 
 	    // Perform marker checks
 	    checkMarker(file, PNG::fileMarkers, scores, FileType::PNG);
