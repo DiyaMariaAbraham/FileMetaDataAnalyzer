@@ -167,7 +167,7 @@ public:
     	
     }
     static void initialize(){
-    	fileMarkers.insert("EOF","0000002066747970");
+    	fileMarkers.insert("SOF","0000002066747970");
 
     	App = "Default Video Player";
 
@@ -459,7 +459,7 @@ public:
 
         // Reset file position to beginning
         file.seekg(0);
-	/*
+	
         // Get the total size of the file
 	file.seekg(0, std::ios::end);
 	std::streampos fileSize = file.tellg();
@@ -487,9 +487,13 @@ public:
 	    checkMarker(file, MP4::fileMarkers, scores, FileType::MP4);
 	    checkMarker(file, ZIP::fileMarkers, scores, FileType::ZIP);
 	    checkMarker(file, PDF::fileMarkers, scores, FileType::PDF);
+	    // Move the file pointer ahead by 1 byte
+    		file.seekg(1, std::ios_base::cur);
 	}
-	*/
 	
+	
+	
+	/*
 	char byte;
 
         while (file.get(byte)) {
@@ -502,7 +506,7 @@ public:
             checkMarker(byteStr, ZIP::fileMarkers, scores, FileType::ZIP);
             checkMarker(byteStr, PDF::fileMarkers, scores, FileType::PDF);
         }
-
+	*/
 
         // Print scores
         for (int i = 0; i < static_cast<int>(FileType::Count); ++i) {
@@ -562,7 +566,7 @@ private:
     }
 
     //checkMarker function
-    /*
+    
     static void checkMarker(std::ifstream& file, const Map<std::string, std::string>& markers, int scores[], FileType type) {
     std::streampos originalPos = file.tellg(); // Save original file position
     for (auto it = markers.begin(); it != markers.end(); it++) {
@@ -588,8 +592,8 @@ private:
         file.seekg(originalPos);
     }
 }
-*/
 
+	/*
 	static void checkMarker(const std::string& byte, const Map<std::string, std::string>& markers, int scores[], FileType type) {
 	    for (auto it = markers.begin(); it != markers.end(); it++) {
 		std::string marker = (*it).value;
@@ -606,7 +610,7 @@ private:
 		}
 	    }
 	}
-
+	*/
 
 
     static std::string getFileTypeName(FileType type) {
