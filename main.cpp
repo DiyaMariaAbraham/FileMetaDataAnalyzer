@@ -85,7 +85,7 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::string command = "eog " + filename; 
         std::system(command.c_str());
     }
 
@@ -129,7 +129,7 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::string command = "eog " + filename;
         std::system(command.c_str());
     }
 
@@ -204,7 +204,7 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "totem " + filename; // Command to open with Eye of GNOME (eog)
+        std::string command = "totem " + filename; 
         std::system(command.c_str());
     }
 
@@ -241,7 +241,7 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "evince " + filename; // Command to open with Documert Viewer
+        std::string command = "evince " + filename; 
         std::system(command.c_str());
     }
 
@@ -316,7 +316,7 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "nano " + filename; // Command to open with Eye of GNOME (eog)
+        std::string command = "nano " + filename; 
         std::system(command.c_str());
     }
 
@@ -356,7 +356,7 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "eog " + filename; // Command to open with Eye of GNOME (eog)
+        std::string command = "eog " + filename; 
         std::system(command.c_str());
     }
 
@@ -389,7 +389,7 @@ public:
 
     	fileMarkers.insert("/body","3c2f626f64793e");
 
-    	App = "Vim Editor";
+    	App = "an Editor";
     	magicNumber = "3c68746d";
     }
     FileType getType() const override {
@@ -397,8 +397,47 @@ public:
     }
     
     void openApplication() const override {
-        std::string command = "firefox " + filename; // Command to open with Eye of GNOME (eog)
-        std::system(command.c_str());
+        //std::string command = "firefox " + filename; 
+        //std::system(command.c_str());
+        std::cout << "Choose an option to open the HTML file:" << std::endl;
+        std::cout << "1. Open with Vim Editor" << std::endl;
+        std::cout << "2. Open with Nano Editor" << std::endl;
+        std::cout << "3. Open with Firefox Browser" << std::endl;
+        std::cout << "Enter your choice: ";
+
+        char choice;
+        std::cin >> choice;
+
+        switch (choice) {
+            case '1': {
+                std::string command = "vim " + filename; // Open with Vim
+                int result = std::system(command.c_str());
+                if (result != 0) {
+                    std::cerr << "Error: Failed to open the file with Vim." << std::endl;
+                }
+                break;
+            }
+            case '2': {
+                std::string command = "nano " + filename; // Open with Nano
+                int result = std::system(command.c_str());
+                if (result != 0) {
+                    std::cerr << "Error: Failed to open the file with Nano." << std::endl;
+                }
+                break;
+            }
+            case '3': {
+                std::string command = "firefox " + filename; // Open with Firefox
+                int result = std::system(command.c_str());
+                if (result != 0) {
+                    std::cerr << "Error: Failed to open the file with Firefox." << std::endl;
+                }
+                break;
+            }
+            default:
+                std::cerr << "Invalid choice" << std::endl;
+                break;
+        }
+    
     }
 
 };
