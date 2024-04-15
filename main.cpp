@@ -20,7 +20,7 @@ enum class FileType {
     JPG,
     BMP,
     MP3,
-    MP4,
+    //MP4,
     ZIP,
     PDF,
     HTML,
@@ -177,7 +177,7 @@ Map<std::string, std::string> MP3::fileMarkers;
 
 
 
-
+/*
 class MP4 : public File {
 protected:
 private:
@@ -212,7 +212,7 @@ public:
 std::string MP4::magicNumber;
 std::string MP4::App;
 Map<std::string, std::string> MP4::fileMarkers;
-
+*/
 class PDF : public File {
 protected:
 private:
@@ -509,12 +509,12 @@ template <>
 struct FileTypeToFile<FileType::MP3> {
     using type = MP3;
 };
-
+/*
 template <>
 struct FileTypeToFile<FileType::MP4> {
     using type = MP4;
 };
-
+*/
 template <>
 struct FileTypeToFile<FileType::ZIP> {
     using type = ZIP;
@@ -537,7 +537,7 @@ public:
         BMP::initialize();
         JPG::initialize();
         MP3::initialize();
-        MP4::initialize();
+        //MP4::initialize();
         PDF::initialize();
         PNG::initialize();
         Text::initialize();
@@ -602,7 +602,7 @@ public:
 	    checkMarker(file, JPG::fileMarkers, scores, FileType::JPG);
 	    checkMarker(file, BMP::fileMarkers, scores, FileType::BMP);
 	    checkMarker(file, MP3::fileMarkers, scores, FileType::MP3);
-	    checkMarker(file, MP4::fileMarkers, scores, FileType::MP4);
+	    //checkMarker(file, MP4::fileMarkers, scores, FileType::MP4);
 	    checkMarker(file, ZIP::fileMarkers, scores, FileType::ZIP);
 	    checkMarker(file, PDF::fileMarkers, scores, FileType::PDF);
 	    checkMarker(file, HTML::fileMarkers, scores, FileType::HTML);
@@ -659,11 +659,13 @@ public:
             FileProcessor<MP3>::Process(mp3File);
             break;
             }
+        /*
         case FileType::MP4:{
             MP4 mp4File(filename);
             FileProcessor<MP4>::Process(mp4File);
             break;
             }
+        */
         case FileType::ZIP:{
             ZIP zipFile(filename);
             FileProcessor<ZIP>::Process(zipFile);
@@ -743,7 +745,7 @@ private:
             case FileType::JPG: return "JPG";
             case FileType::BMP: return "BMP";
             case FileType::MP3: return "MP3";
-            case FileType::MP4: return "MP4";
+            //case FileType::MP4: return "MP4";
             case FileType::ZIP: return "ZIP";
             case FileType::PDF: return "PDF";
             case FileType::HTML: return "HTML";
@@ -757,7 +759,7 @@ private:
             case FileType::JPG: return JPG::magicNumber;
             case FileType::BMP: return BMP::magicNumber;
             case FileType::MP3: return MP3::magicNumber;
-            case FileType::MP4: return MP4::magicNumber;
+            //case FileType::MP4: return MP4::magicNumber;
             case FileType::ZIP: return ZIP::magicNumber;
             case FileType::PDF: return PDF::magicNumber;
             case FileType::HTML: return HTML::magicNumber;
