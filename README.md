@@ -1,0 +1,5 @@
+The File Metadata Analyzer is a tool which can be used to determine file types, by comparing the headers of the file with existing file headers. This Project supports the following File Types:
+Text, PNG, JPG, BMP, MP3, MP4, ZIP,HTML and PDF
+Initially the tool filters out invalid files, after which it scores the inputted files based on possible file types. Bytes of the file are read and are matched with known headers of existing file types and a list of scores for the file is displayed. The highest score is the maximum likelihood filetype of the file. This is more effective when compared to just Magic Number mapping as, the magic number of the file can be easily tampered with using a hex editor. An Object of the filetype with the highest score is created for the file and the size of the file is inferred from the total bytes read from the file.
+The tool possesses the capability of determining file types for files that don’t have extensions.
+The tool also suggests applications with which the file can be opened, depending on its type.
